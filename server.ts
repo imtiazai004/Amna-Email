@@ -174,6 +174,8 @@ async function startServer() {
 
   app.get('/api/subjects', (req, res) => res.json(db.subjects));
 
+  app.get('/api/departments', (req, res) => res.json(db.departments));
+
   // Teachers
   app.get('/api/teachers', (req, res) => {
     const enriched = db.teachers.map(t => ({

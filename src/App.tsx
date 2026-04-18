@@ -21,6 +21,8 @@ import { ClassSmartManagement } from '@/modules/academics/components/ClassSmartM
 import { TeacherManagement } from '@/modules/staff/components/TeacherManagement';
 import { ExaminationCenter } from '@/modules/academics/components/ExaminationCenter';
 import { StaffAttendance } from '@/modules/staff/components/StaffAttendance';
+import { TeacherDirectory } from '@/modules/staff/components/TeacherDirectory';
+import { TeacherSchedule } from '@/modules/staff/components/TeacherSchedule';
 import { FeeManagement } from '@/modules/finance/components/FeeManagement';
 import { SchoolEvents } from '@/modules/social/components/SchoolEvents';
 import { GuardianDashboard } from '@/modules/guardian/components/GuardianDashboard';
@@ -202,6 +204,8 @@ export default function App() {
               
               {/* Centralized Staff Module */}
               <Route path="/staff/attendance" element={<StaffAttendance />} />
+              <Route path="/staff/directory" element={<TeacherDirectory />} />
+              <Route path="/staff/schedule" element={<TeacherSchedule />} />
               
               {/* Centralized Finance Module */}
               <Route path="/finance/fee-management" element={<FeeManagement />} />
@@ -222,6 +226,8 @@ export default function App() {
                   '/academics/teachers',
                   '/academics/exams',
                   '/staff/attendance',
+                  '/staff/directory',
+                  '/staff/schedule',
                   '/finance/fee-management',
                   '/social/events',
                   '/guardian/guardian-dashboard'

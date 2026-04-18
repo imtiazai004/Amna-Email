@@ -20,6 +20,7 @@ export const AcademicService = {
   bulkImport: (classes: any[]) => api.post('/classes/bulk-import', { classes }).then(r => r.data),
   getSchedules: () => api.get('/schedules').then(r => r.data),
   getSubjects: () => api.get('/subjects').then(r => r.data),
+  getDepartments: () => api.get('/departments').then(r => r.data),
 };
 
 export const TeacherService = {
