@@ -11,7 +11,8 @@ export const useGuardianSummary = (id?: string) => {
   });
 
   return {
-    summary: summaryQuery.data || [],
+    summary: summaryQuery.data?.summary || [],
+    guardian: summaryQuery.data?.guardian || null,
     isLoading: summaryQuery.isLoading,
   };
 };

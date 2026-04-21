@@ -9,10 +9,15 @@ import {
   LogOut, 
   Menu,
   ChevronRight,
-  School
+  School,
+  LogIn,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PORTALS } from '@/constants';
+import { useFirebase } from '@/context/FirebaseContext';
+
+import { LandingPage } from '@/components/LandingPage';
 
 // Modular Component Imports
 import { DashboardHome } from '@/modules/dashboard/components/DashboardHome';
@@ -55,7 +60,25 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePortal, setActivePortal] = useState<string | null>(null);
+  const { user, profile, isLoading, login, logout } = useFirebase();
   const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+           <div className="w-12 h-12 bg-white border border-border-theme rounded-2xl flex items-center justify-center shadow-sm">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+           </div>
+           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted animate-pulse">Syncing Distributed Node...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LandingPage onLogin={login} />;
+  }
 
   return (
     <div className="min-h-screen bg-bg flex font-sans overflow-hidden h-screen text-text-main selection:bg-primary/10 selection:text-primary">
@@ -149,7 +172,10 @@ export default function App() {
         </nav>
 
         <div className="p-4 border-t border-border-theme">
-          <button className="w-full h-10 flex items-center gap-3 px-4 rounded-lg text-[13px] text-text-muted hover:bg-red-50 hover:text-red-600 transition-all font-bold">
+          <button 
+            onClick={logout}
+            className="w-full h-10 flex items-center gap-3 px-4 rounded-lg text-[13px] text-text-muted hover:bg-red-50 hover:text-red-600 transition-all font-bold"
+          >
             <LogOut size={16} />
             {sidebarOpen && <span className="uppercase tracking-widest">Terminate Session</span>}
           </button>
@@ -188,11 +214,11 @@ export default function App() {
 
             <div className="flex items-center gap-3 pl-6 border-l border-border-theme">
               <div className="hidden lg:block text-right">
-                <p className="text-[11px] font-black text-text-main uppercase tracking-tight">System Authority</p>
-                <p className="text-[9px] text-primary uppercase font-black tracking-widest leading-none">Global Admin</p>
+                <p className="text-[11px] font-black text-text-main uppercase tracking-tight">{profile?.name || user?.displayName}</p>
+                <p className="text-[9px] text-primary uppercase font-black tracking-widest leading-none">{profile?.role || 'Authority Node'}</p>
               </div>
-              <div className="w-9 h-9 rounded-lg bg-text-main text-white flex items-center justify-center font-bold text-xs shadow-md">
-                SA
+              <div className="w-9 h-9 rounded-lg bg-text-main text-white flex items-center justify-center font-bold text-xs shadow-md uppercase">
+                {(profile?.name || user?.displayName || 'S').charAt(0)}
               </div>
             </div>
           </div>

@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // --- GLOBAL DENY ---
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Multi-tenant isolation: every path starts with /schools/{schoolId}
+    function belongsToSchool(schoolId) {
+      return isValidId(schoolId) && isSignedIn() && get(/databases/$(database)/documents/schools/$(schoolId)/users/$(request.auth.uid)).data.schoolId == schoolId;
+    }
+
+    function isAdmin(schoolId) {
+      return belongsToSchool(schoolId) && get(/databases/$(database)/documents/schools/$(schoolId)/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+
+    function isTeacher(schoolId) {
+      return belongsToSchool(schoolId) && get(/databases/$(database)/documents/schools/$(schoolId)/users/$(request.auth.uid)).data.role == 'TEACHER';
+    }
+
+    // --- ENTITY VALIDATIONS ---
+    
+    function isValidUser(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 200 &&
+             data.email is string && data.email.size() <= 200 &&
+             data.role in ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN'] &&
+             data.schoolId is string;
+    }
+
+    function isValidStudent(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.userId is string && data.classId is string &&
+             data.schoolId is string;
+    }
+
+    // --- MATCH BLOCKS ---
+
+    match /schools/{schoolId} {
+      allow get: if isSignedIn(); // Basic school info check
+      
+      match /users/{userId} {
+        allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin(schoolId));
+        allow list: if isAdmin(schoolId) && resource.data.schoolId == schoolId;
+        allow create: if isSignedIn() && isValidUser(incoming()) && (
+          // Standard signup logic or admin enrollment
+          incoming().schoolId == schoolId && incoming().id == userId
+        );
+        allow update: if isAdmin(schoolId) && isValidUser(incoming()) && 
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'email', 'role']);
+      }
+
+      match /students/{studentId} {
+        allow get: if belongsToSchool(schoolId) && (
+          isAdmin(schoolId) || 
+          isTeacher(schoolId) || 
+          get(/databases/$(database)/documents/schools/$(schoolId)/students/$(studentId)).data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/schools/$(schoolId)/students/$(studentId)).data.guardianId == get(/databases/$(database)/documents/schools/$(schoolId)/guardians/$(request.auth.uid)).id
+        );
+        allow list: if belongsToSchool(schoolId) && resource.data.schoolId == schoolId;
+        allow write: if isAdmin(schoolId) && isValidStudent(incoming());
+      }
+
+      // Additional matches for other collections follow same pattern...
+      // For brevity in the draft, I will expand the final rules with all 15 collections.
+    }
+  }
+}

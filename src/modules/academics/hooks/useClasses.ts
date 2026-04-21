@@ -1,32 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AcademicService } from '@/lib/api';
+import { useFirebase } from '@/context/FirebaseContext';
 
 export const useClasses = () => {
   const queryClient = useQueryClient();
+  const { profile } = useFirebase();
+  const schoolId = profile?.schoolId;
 
   const classesQuery = useQuery({
-    queryKey: ['classes'],
+    queryKey: ['classes', schoolId],
     queryFn: AcademicService.getClasses,
+    enabled: !!schoolId,
   });
 
   const schedulesQuery = useQuery({
-    queryKey: ['schedules'],
+    queryKey: ['schedules', schoolId],
     queryFn: AcademicService.getSchedules,
+    enabled: !!schoolId,
   });
 
   const createClassMutation = useMutation({
     mutationFn: AcademicService.createClass,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-      queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['classes', schoolId] });
+      queryClient.invalidateQueries({ queryKey: ['stats', schoolId] });
     }
   });
 
   const bulkImportMutation = useMutation({
     mutationFn: AcademicService.bulkImport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-      queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['classes', schoolId] });
+      queryClient.invalidateQueries({ queryKey: ['stats', schoolId] });
     }
   });
 

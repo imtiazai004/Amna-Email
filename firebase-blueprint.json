@@ -1,0 +1,279 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Base user profile for any role",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["ADMIN", "TEACHER", "STUDENT", "GUARDIAN"] },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "role", "schoolId"]
+    },
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Academic staff profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "departmentId": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string" },
+        "avatar": { "type": "string" },
+        "salary": { "type": "number" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "userId", "departmentId", "schoolId"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student academic profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "classId": { "type": "string" },
+        "guardianId": { "type": "string" },
+        "status": { "type": "string" },
+        "avatar": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "userId", "classId", "guardianId", "schoolId"]
+    },
+    "Guardian": {
+      "title": "Guardian",
+      "description": "Parent or guardian associated with students",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "phone": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "userId", "phone", "schoolId"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "Academic or administrative department",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "schoolId"]
+    },
+    "Class": {
+      "title": "Class",
+      "description": "Grade level or section",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "grade": { "type": "string" },
+        "section": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "grade", "schoolId"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Academic subject",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "code", "schoolId"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "Timetable entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "classId": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "day": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "room": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "classId", "subjectId", "teacherId", "day", "startTime", "endTime", "schoolId"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Presence log for students or teachers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "entityId": { "type": "string" },
+        "entityType": { "type": "string", "enum": ["STUDENT", "TEACHER"] },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Present", "Absent", "Late", "Excused"] },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "entityId", "entityType", "date", "status", "schoolId"]
+    },
+    "Fee": {
+      "title": "Fee",
+      "description": "Financial record for student charges",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "amountPaid": { "type": "number" },
+        "dueDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Paid", "Pending", "Overdue"] },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "studentId", "categoryId", "amountPaid", "dueDate", "status", "schoolId"]
+    },
+    "FeeCategory": {
+      "title": "Fee Category",
+      "description": "Types of fees (Tuition, Library, etc.)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "amount": { "type": "number" },
+        "frequency": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "amount", "schoolId"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Campus events and announcements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "location": { "type": "string" },
+        "category": { "type": "string" },
+        "image": { "type": "string" },
+        "status": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "title", "date", "schoolId"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Academic assessment cycle",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "totalMarks": { "type": "number" },
+        "status": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "name", "date", "totalMarks", "schoolId"]
+    },
+    "ExamResult": {
+      "title": "Exam Result",
+      "description": "Student performance record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "examId": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "marks": { "type": "number" },
+        "gradingNode": { "type": "string" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "studentId", "examId", "subjectId", "marks", "schoolId"]
+    },
+    "SalaryPayment": {
+      "title": "Salary Payment",
+      "description": "Payroll record for staff",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "month": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "paymentDate": { "type": "string", "format": "date" },
+        "schoolId": { "type": "string" }
+      },
+      "required": ["id", "teacherId", "month", "amount", "status", "schoolId"]
+    }
+  },
+  "firestore": {
+    "/schools/{schoolId}/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles organized by school"
+    },
+    "/schools/{schoolId}/teachers/{teacherId}": {
+      "schema": "Teacher",
+      "description": "Teachers in a school"
+    },
+    "/schools/{schoolId}/students/{studentId}": {
+      "schema": "Student",
+      "description": "Students in a school"
+    },
+    "/schools/{schoolId}/guardians/{guardianId}": {
+      "schema": "Guardian",
+      "description": "Guardians in a school"
+    },
+    "/schools/{schoolId}/departments/{departmentId}": {
+      "schema": "Department",
+      "description": "Departments in a school"
+    },
+    "/schools/{schoolId}/classes/{classId}": {
+      "schema": "Class",
+      "description": "Classes in a school"
+    },
+    "/schools/{schoolId}/subjects/{subjectId}": {
+      "schema": "Subject",
+      "description": "Subjects in a school"
+    },
+    "/schools/{schoolId}/schedules/{scheduleId}": {
+      "schema": "Schedule",
+      "description": "Schedules in a school"
+    },
+    "/schools/{schoolId}/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Attendance logs in a school"
+    },
+    "/schools/{schoolId}/fees/{feeId}": {
+      "schema": "Fee",
+      "description": "Financial records in a school"
+    },
+    "/schools/{schoolId}/feeCategories/{categoryId}": {
+      "schema": "FeeCategory",
+      "description": "Fee categories in a school"
+    },
+    "/schools/{schoolId}/events/{eventId}": {
+      "schema": "Event",
+      "description": "Events in a school"
+    },
+    "/schools/{schoolId}/exams/{examId}": {
+      "schema": "Exam",
+      "description": "Exams in a school"
+    },
+    "/schools/{schoolId}/examResults/{resultId}": {
+      "schema": "ExamResult",
+      "description": "Exam results in a school"
+    },
+    "/schools/{schoolId}/salaryPayments/{paymentId}": {
+      "schema": "SalaryPayment",
+      "description": "Salary payments in a school"
+    }
+  }
+}

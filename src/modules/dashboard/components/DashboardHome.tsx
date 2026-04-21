@@ -14,22 +14,45 @@ import {
 } from 'lucide-react';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useNavigate } from 'react-router-dom';
+import { seedDatabase } from '@/lib/seedFirestore';
+import { useFirebase } from '@/context/FirebaseContext';
 
 export const DashboardHome = () => {
-  const { stats, isLoading } = useDashboardStats();
+  const { stats, isLoading, refetch } = useDashboardStats() as any;
+  const { currentSchoolId } = useFirebase();
   const navigate = useNavigate();
+  const [isSeeding, setIsSeeding] = React.useState(false);
+
+  // Auto-seed if the database is empty for the current school
+  React.useEffect(() => {
+    if (!isLoading && stats.students === 0 && currentSchoolId === 'default-school' && !isSeeding) {
+      const performSeed = async () => {
+        setIsSeeding(true);
+        try {
+          await seedDatabase('default-school');
+          refetch();
+        } catch (err) {
+          console.error("Seeding failed:", err);
+        } finally {
+          setIsSeeding(false);
+        }
+      };
+      performSeed();
+    }
+  }, [isLoading, stats.students, currentSchoolId, isSeeding, refetch]);
 
   const cards = [
     { label: 'Total Students', value: stats.students.toString(), icon: GraduationCap, trend: '+12%', color: 'blue' },
     { label: 'Active Faculty', value: stats.teachers.toString(), icon: Users, trend: 'Stable', color: 'indigo' },
     { label: 'Attendance Rate', value: stats.attendance, icon: Calendar, trend: '+2.4%', color: 'green' },
-    { label: 'Collections', value: '$' + stats.feesCollected.toLocaleString(), icon: DollarSign, trend: '+8.1%', color: 'purple' },
+    { label: 'Collections', value: '$' + (stats.feesCollected || 0).toLocaleString(), icon: DollarSign, trend: '+8.1%', color: 'purple' },
   ];
 
-  if (isLoading) {
+  if (isLoading || isSeeding) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        {isSeeding && <p className="text-[10px] font-black uppercase tracking-widest text-text-muted animate-pulse">Initializing Master Ledger...</p>}
       </div>
     );
   }
