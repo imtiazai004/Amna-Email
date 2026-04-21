@@ -47,6 +47,7 @@ export const PORTALS = [
     subPortals: [
       { id: 'finance-overview', name: 'Finance Overview', icon: LayoutDashboard },
       { id: 'fee-management', name: 'Fee Management', icon: CreditCard },
+      { id: 'fee-tracking', name: 'Fee Tracking', icon: Search },
       { id: 'salary-management', name: 'Salary Management', icon: FileText }
     ]
   },

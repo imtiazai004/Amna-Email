@@ -30,6 +30,11 @@ export const TeacherService = {
 export const FinanceService = {
   getFees: () => api.get('/fees').then(r => r.data),
   payFee: (id: string, amount: number) => api.patch(`/fees/${id}/pay`, { amount }).then(r => r.data),
+  getFeeCategories: () => api.get('/fee-categories').then(r => r.data),
+  createFeeCategory: (data: any) => api.post('/fee-categories', data).then(r => r.data),
+  getOverview: () => api.get('/finance/overview').then(r => r.data),
+  getSalaries: () => api.get('/salaries').then(r => r.data),
+  paySalary: (id: string) => api.patch(`/salaries/${id}/pay`).then(r => r.data),
 };
 
 export const AttendanceService = {
@@ -54,4 +59,5 @@ export const DashboardService = {
 
 export const GuardianService = {
   getSummary: (id: string) => api.get(`/guardians/${id}/summary`).then(r => r.data),
+  searchByPhone: (phone: string) => api.get(`/guardians/search-by-phone/${phone}`).then(r => r.data),
 };

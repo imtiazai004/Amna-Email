@@ -23,9 +23,17 @@ import { ExaminationCenter } from '@/modules/academics/components/ExaminationCen
 import { StaffAttendance } from '@/modules/staff/components/StaffAttendance';
 import { TeacherDirectory } from '@/modules/staff/components/TeacherDirectory';
 import { TeacherSchedule } from '@/modules/staff/components/TeacherSchedule';
+import { FinanceOverview } from '@/modules/finance/components/FinanceOverview';
 import { FeeManagement } from '@/modules/finance/components/FeeManagement';
+import { FeeTracking } from '@/modules/finance/components/FeeTracking';
+import { SalaryManagement } from '@/modules/finance/components/SalaryManagement';
 import { SchoolEvents } from '@/modules/social/components/SchoolEvents';
 import { GuardianDashboard } from '@/modules/guardian/components/GuardianDashboard';
+import { GuardianCommunication } from '@/modules/guardian/components/GuardianCommunication';
+import { GuardianFees } from '@/modules/guardian/components/GuardianFees';
+import { GuardianAttendance } from '@/modules/guardian/components/GuardianAttendance';
+import { GuardianPerformance } from '@/modules/guardian/components/GuardianPerformance';
+import { GuardianMeetings } from '@/modules/guardian/components/GuardianMeetings';
 
 // --- Unified Placeholder Template ---
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -208,13 +216,21 @@ export default function App() {
               <Route path="/staff/schedule" element={<TeacherSchedule />} />
               
               {/* Centralized Finance Module */}
+              <Route path="/finance/finance-overview" element={<FinanceOverview />} />
               <Route path="/finance/fee-management" element={<FeeManagement />} />
+              <Route path="/finance/fee-tracking" element={<FeeTracking />} />
+              <Route path="/finance/salary-management" element={<SalaryManagement />} />
               
               {/* Centralized Social & Web Module */}
               <Route path="/social/events" element={<SchoolEvents />} />
               
               {/* Interconnected Guardian Portal */}
               <Route path="/guardian/guardian-dashboard" element={<GuardianDashboard />} />
+              <Route path="/guardian/communication" element={<GuardianCommunication />} />
+              <Route path="/guardian/fees" element={<GuardianFees />} />
+              <Route path="/guardian/attendance-history" element={<GuardianAttendance />} />
+              <Route path="/guardian/performance" element={<GuardianPerformance />} />
+              <Route path="/guardian/meetings" element={<GuardianMeetings />} />
               
               {/* Automated Placeholder System for Under-Development Features */}
               {PORTALS.flatMap(portal => portal.subPortals).map(sub => {
@@ -228,9 +244,17 @@ export default function App() {
                   '/staff/attendance',
                   '/staff/directory',
                   '/staff/schedule',
+                  '/finance/finance-overview',
                   '/finance/fee-management',
+                  '/finance/fee-tracking',
+                  '/finance/salary-management',
                   '/social/events',
-                  '/guardian/guardian-dashboard'
+                  '/guardian/guardian-dashboard',
+                  '/guardian/communication',
+                  '/guardian/fees',
+                  '/guardian/attendance-history',
+                  '/guardian/performance',
+                  '/guardian/meetings'
                 ];
 
                 if (implementedPaths.includes(fullPath)) return null;

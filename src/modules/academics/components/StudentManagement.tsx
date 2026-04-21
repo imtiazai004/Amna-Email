@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, MoreVertical, Search, Filter, Mail, Phone, ArrowUpRight, Ban, CheckCircle2, UserCircle2 } from 'lucide-react';
+import { UserPlus, MoreVertical, Search, Filter, Mail, Phone, ArrowUpRight, Ban, CheckCircle2, UserCircle2, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -16,7 +16,13 @@ export const StudentManagement = () => {
   const [withdrawStudentId, setWithdrawStudentId] = useState<string | null>(null);
   const [showSelectionModal, setShowSelectionModal] = useState<null | 'promote' | 'withdraw'>(null);
   
-  const [newStudent, setNewStudent] = useState({ name: '', email: '', classId: '', guardianId: 'g1' });
+  const [newStudent, setNewStudent] = useState({ 
+    name: '', 
+    email: '', 
+    classId: '', 
+    guardianPhone: '', 
+    guardianName: '' 
+  });
 
   const { students, isLoading, createStudent, isCreating, promoteStudent, withdrawStudent } = useStudents();
   const { classes } = useClasses();
@@ -48,7 +54,13 @@ export const StudentManagement = () => {
     }, {
       onSuccess: () => {
         setShowAdmissionModal(false);
-        setNewStudent({ name: '', email: '', classId: '', guardianId: 'g1' });
+        setNewStudent({ 
+          name: '', 
+          email: '', 
+          classId: '', 
+          guardianPhone: '', 
+          guardianName: '' 
+        });
       }
     });
   };
@@ -187,12 +199,44 @@ export const StudentManagement = () => {
               ))}
             </select>
           </div>
+          <div className="space-y-4 pt-4 border-t border-border-theme">
+             <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck size={14} className="text-indigo-600" />
+                <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest leading-none">Guardian Identification Node</span>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Parent Name</label>
+                  <input 
+                    required
+                    type="text" 
+                    className="w-full bg-bg border border-border-theme p-3 rounded-lg text-sm text-text-main focus:ring-2 focus:ring-indigo-600/20 outline-none transition-all"
+                    placeholder="Parent/Guardian Name"
+                    value={newStudent.guardianName}
+                    onChange={e => setNewStudent({...newStudent, guardianName: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Contact Phone (Unified)</label>
+                  <input 
+                    required
+                    type="tel" 
+                    className="w-full bg-bg border border-border-theme p-3 rounded-lg text-sm text-text-main focus:ring-2 focus:ring-indigo-600/20 outline-none transition-all"
+                    placeholder="e.g., 555-0123"
+                    value={newStudent.guardianPhone}
+                    onChange={e => setNewStudent({...newStudent, guardianPhone: e.target.value})}
+                  />
+                </div>
+             </div>
+             <p className="text-[9px] text-text-muted font-bold uppercase tracking-tight italic">Using a unique phone number unifies multi-student records under a single node.</p>
+          </div>
+          
           <button 
             type="submit"
             disabled={isCreating}
-            className="w-full bg-primary text-white py-3 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] mt-4 hover:opacity-95 transition-all shadow-md flex items-center justify-center gap-2"
+            className="w-full bg-indigo-900 text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] mt-6 hover:opacity-95 transition-all shadow-xl shadow-indigo-900/20 flex items-center justify-center gap-2"
           >
-            {isCreating ? 'Synchronizing...' : 'Commit to Database'}
+            {isCreating ? 'Synchronizing Institutional Ledger...' : 'Commit to Master Database'}
           </button>
         </form>
       </Modal>
