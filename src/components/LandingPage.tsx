@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { Routes, Route, Link } from 'react-router-dom';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { 
   School, 
   ChevronRight, 
+  ChevronDown,
   ArrowRight, 
   ShieldCheck, 
   Globe, 
@@ -14,13 +16,15 @@ import {
   CheckCircle2,
   Lock,
   Menu,
-  X
+  X,
+  Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Navbar } from './common/Navbar';
+import { FEATURE_CATEGORIES } from '@/constants/features';
 
-export const LandingPage = ({ onLogin }: { onLogin: () => void }) => {
+export const LandingPage = ({ onLogin, onRequestAccess }: { onLogin: () => void; onRequestAccess?: () => void }) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
   const headerBg = useTransform(scrollY, [0, 50], ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.9)']);
   const headerBorder = useTransform(scrollY, [0, 50], ['rgba(255, 255, 255, 0)', 'rgba(0, 0, 0, 0.05)']);
@@ -56,46 +60,7 @@ export const LandingPage = ({ onLogin }: { onLogin: () => void }) => {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
-      {/* Navigation */}
-      <motion.nav 
-        style={{ backgroundColor: headerBg, borderBottom: `1px solid ${headerBorder}` }}
-        className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md transition-all h-20 flex items-center px-6 lg:px-20 justify-between"
-      >
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="bg-indigo-600 text-white p-2 rounded-xl group-hover:scale-110 transition-transform shadow-lg shadow-indigo-600/20">
-              <School size={24} />
-            </div>
-            <span className="text-xl font-bold tracking-tighter uppercase italic">EduFlow</span>
-          </div>
-          
-          <div className="hidden lg:flex items-center gap-8">
-            {['Product', 'Solutions', 'Developers', 'Resources', 'Pricing'].map((item) => (
-              <a key={item} href="#" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onLogin}
-            className="hidden sm:flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-slate-900 px-4 py-2 transition-colors"
-          >
-            Sign in <ChevronRight size={16} />
-          </button>
-          <button 
-            onClick={onLogin}
-            className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all"
-          >
-            Request Access
-          </button>
-          <button className="lg:hidden p-2 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </motion.nav>
+      <Navbar onLogin={onLogin} onRequestAccess={onRequestAccess} transparent />
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-20 lg:pt-56 lg:pb-32 overflow-hidden">
@@ -116,27 +81,28 @@ export const LandingPage = ({ onLogin }: { onLogin: () => void }) => {
               <Zap size={12} className="fill-indigo-600" />
               SaaS Infrastructure for Education
             </div>
-            <h1 className="text-6xl lg:text-8xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-8 italic uppercase">
-              Financial Infrastructure <br/>
-              <span className="text-indigo-600">for Modern Schools.</span>
+            <h1 className="text-6xl lg:text-[100px] font-black text-slate-900 leading-[0.85] tracking-tighter mb-10 italic uppercase">
+              Institutional <br/>
+              <span className="text-indigo-600">Intelligence.</span>
             </h1>
-            <p className="text-lg lg:text-xl text-slate-600 mb-10 max-w-xl leading-relaxed font-medium">
-              A unified operating system for institutional intelligence. Streamline enrollments, automate complex billings, and empower parents with a dedicated financial transparency engine. 
+            <p className="text-lg lg:text-2xl text-slate-600 mb-12 max-w-xl leading-relaxed font-medium">
+              Building the financial and academic architecture for the internet of education. Streamline enrollments, automate complex billings, and empower parents.
             </p>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-5">
               <button 
-                onClick={onLogin}
-                className="bg-indigo-900 text-white px-8 py-4 rounded-full font-bold shadow-2xl shadow-indigo-900/30 hover:bg-slate-950 transition-all flex items-center gap-3 group"
+                onClick={onRequestAccess || onLogin}
+                className="bg-indigo-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-2xl shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group italic"
               >
-                Launch Institutional Demo
+                Request Live Demo
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
                 onClick={onLogin}
-                className="bg-white border border-slate-200 text-slate-900 px-8 py-4 rounded-full font-bold hover:bg-slate-50 transition-all flex items-center gap-3"
+                className="bg-white border border-slate-200 text-slate-900 px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm hover:border-slate-400 hover:bg-slate-50 transition-all flex items-center gap-3 italic"
               >
-                Contact Sales
+                <Play size={18} className="fill-slate-900" />
+                Watch Overview
               </button>
             </div>
 
@@ -286,6 +252,34 @@ export const LandingPage = ({ onLogin }: { onLogin: () => void }) => {
          </div>
       </section>
 
+      {/* Deployment CTA */}
+      <section className="py-32 bg-white relative overflow-hidden">
+         <div className="max-w-[1400px] mx-auto px-6 lg:px-20">
+            <div className="bg-indigo-900 rounded-[60px] p-12 lg:p-24 text-center relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-1/3 h-full bg-white opacity-[0.03] skew-x-[-20deg] transform origin-top group-hover:translate-x-10 transition-transform duration-[2s]" />
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true }}
+               >
+                  <h2 className="text-4xl lg:text-7xl font-black text-white italic uppercase tracking-tighter leading-none mb-10">Ready to deploy the <br/>future of education?</h2>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                    <button 
+                      onClick={onRequestAccess || onLogin}
+                      className="w-full sm:w-auto px-12 py-6 bg-white text-indigo-900 rounded-full font-black uppercase tracking-widest text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all italic"
+                    >
+                      Provision Your Node
+                    </button>
+                    <button className="w-full sm:w-auto px-12 py-6 bg-indigo-800 text-indigo-100 rounded-full font-black uppercase tracking-widest text-lg hover:bg-indigo-700 transition-all italic border border-indigo-700">
+                      View Architecture
+                    </button>
+                  </div>
+                  <p className="mt-12 text-indigo-300 font-bold uppercase tracking-[0.2em] text-[10px]">Trusted by thousands of leading universities and K-12 systems globally</p>
+               </motion.div>
+            </div>
+         </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-20 bg-slate-50 border-t border-slate-100">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-20 grid grid-cols-2 lg:grid-cols-5 gap-12">
@@ -304,18 +298,18 @@ export const LandingPage = ({ onLogin }: { onLogin: () => void }) => {
           </div>
           
           {[
-            { title: "Product", items: ["Academics", "Finance", "Staff Hub", "Guardian", "Intelligence"] },
-            { title: "Company", items: ["About", "Success Stories", "Security", "Partners", "Contact"] },
-            { title: "Resources", items: ["Documentation", "Guides", "API Reference", "Status", "Privacy"] }
+            { title: "Product", items: [{ name: "Academics", path: "/features/classes-management" }, { name: "Finance", path: "/features/fee-management" }, { name: "Staff Hub", path: "/features/teachers-directory" }, { name: "Guardian", path: "/features/guardian-dashboard-feature" }, { name: "Intelligence", path: "/features/examination-center" }] },
+            { title: "Developers", items: [{ name: "REST API", path: "/marketing/developers" }, { name: "Webhooks", path: "/marketing/developers" }, { name: "Identity", path: "/marketing/developers" }, { name: "SDKs", path: "/marketing/developers" }] },
+            { title: "Resources", items: [{ name: "Documentation", path: "/marketing/resources" }, { name: "Guides", path: "/marketing/resources" }, { name: "Case Studies", path: "/marketing/resources" }, { name: "Status", path: "/marketing/resources" }] }
           ].map((col) => (
             <div key={col.title}>
               <h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6">{col.title}</h5>
               <ul className="space-y-4">
                 {col.items.map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors">
-                      {item}
-                    </a>
+                  <li key={item.name}>
+                    <Link to={item.path} className="text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors">
+                      {item.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

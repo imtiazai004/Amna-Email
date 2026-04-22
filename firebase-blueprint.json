@@ -212,9 +212,46 @@
         "schoolId": { "type": "string" }
       },
       "required": ["id", "teacherId", "month", "amount", "status", "schoolId"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "School access request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "adminName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "CONTACTED"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "schoolName", "adminName", "email", "status", "createdAt"]
+    },
+    "ActiveSchool": {
+      "title": "Active School",
+      "description": "Approved school node",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "adminEmail": { "type": "string" },
+        "approvedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED"] }
+      },
+      "required": ["id", "schoolName", "adminEmail", "approvedAt", "status"]
     }
   },
   "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Access requests from schools"
+    },
+    "/active_schools/{schoolId}": {
+      "schema": "ActiveSchool",
+      "description": "Verified institutional nodes"
+    },
     "/schools/{schoolId}/users/{userId}": {
       "schema": "User",
       "description": "User profiles organized by school"

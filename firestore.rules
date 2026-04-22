@@ -12,10 +12,23 @@ service cloud.firestore {
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'iamna2462@gmail.com';
+    }
 
     // --- CONNECTIVITY PROBE ---
     match /_internal_/probe {
       allow get: if isSignedIn();
+    }
+
+    match /leads/{leadId} {
+      allow list, update, delete: if isSuperAdmin();
+      allow get: if isSuperAdmin() || (isSignedIn() && existing().email == request.auth.token.email);
+      allow create: if true; 
+    }
+
+    match /active_schools/{schoolId} {
+      allow read, write: if isSuperAdmin();
     }
     
     // Multi-tenant check: User's profile must exist in the same school sub-path

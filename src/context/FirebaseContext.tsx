@@ -40,6 +40,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [currentSchoolId, setCurrentSchoolId] = useState<string | null>(localStorage.getItem('eduFlow_schoolId'));
 
   useEffect(() => {
@@ -48,8 +49,6 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       if (firebaseUser) {
         // Attempt to find profile in ANY school (multi-tenant lookup)
-        // For SaaS, users usually belong to a school.
-        // We'll look for the profile in the last known school or fallback to 'default'
         const schoolId = currentSchoolId || 'default-school';
         const profileRef = doc(db, 'schools', schoolId, 'users', firebaseUser.uid);
         const profileSnap = await getDoc(profileRef);
@@ -60,8 +59,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setCurrentSchoolId(profileData.schoolId);
           localStorage.setItem('eduFlow_schoolId', profileData.schoolId);
         } else {
-          // New User Flow: Create a default admin profile for the first user of a new "default-school"
-          // In a real SaaS, this would involve a registration form
+          // New User Flow
           const newProfile: UserProfile = {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || 'System User',
@@ -78,15 +76,21 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setProfile(null);
       }
       setIsLoading(false);
+      setIsAuthenticating(false); // Reset authentication state on auth change
     });
 
     return () => unsubscribe();
   }, [currentSchoolId]);
 
   const login = async () => {
+    if (isAuthenticating) {
+      console.warn('Authentication already in progress.');
+      return;
+    }
+
     try {
+      setIsAuthenticating(true);
       const provider = new GoogleAuthProvider();
-      // Force account selection to prevent background blocking issues in some browsers
       provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
     } catch (error: any) {
@@ -99,6 +103,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } else {
         console.error('Firebase Authentication Error:', error);
       }
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 

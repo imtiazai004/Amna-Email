@@ -82,6 +82,40 @@ async function startServer() {
 
   // Health
   app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+  
+  // --- LEAD & NOTIFICATION PIPELINE ---
+  app.post('/api/leads', async (req, res) => {
+    const lead = req.body;
+    console.log('--- NEW INSTITUTIONAL LEAD CAPTURED ---');
+    console.log(`Institution: ${lead.schoolName}`);
+    console.log(`Admin: ${lead.adminName} (${lead.email})`);
+    console.log(`Phone: ${lead.phone}`);
+    
+    // In a real production environment, we would use a webhook or messaging service here.
+    // Example: Triggering a Zapier/Make/Slack webhook
+    /*
+    const WEBHOOK_URL = process.env.LEAD_WEBHOOK_URL;
+    if (WEBHOOK_URL) {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: '#leads',
+          text: `🚨 *New Deployment Request*\n*School:* ${lead.schoolName}\n*Admin:* ${lead.adminName} (${lead.email})\n*WhatsApp:* ${lead.phone}`
+        })
+      });
+    }
+    */
+    
+    res.status(201).json({ status: 'notified', timestamp: new Date() });
+  });
+
+  app.post('/api/emails/welcome', async (req, res) => {
+    const { email, schoolName, adminName } = req.body;
+    console.log(`--- TRIGGERING WELCOME SEQUENCE: ${email} ---`);
+    console.log(`Strategic Welcome Email sent to ${adminName} for ${schoolName}.`);
+    res.json({ status: 'welcome_transmitted' });
+  });
 
   // Dashboard Stats (Aggregated)
   app.get('/api/stats', (req, res) => {

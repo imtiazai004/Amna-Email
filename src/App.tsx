@@ -18,6 +18,10 @@ import { PORTALS } from '@/constants';
 import { useFirebase } from '@/context/FirebaseContext';
 
 import { LandingPage } from '@/components/LandingPage';
+import { FeaturePage } from '@/components/FeaturePage';
+import { MarketingPage } from '@/components/MarketingPage';
+import { SuperAdminDashboard } from '@/components/SuperAdminDashboard';
+import { RequestAccessForm } from '@/components/landing/RequestAccessForm';
 
 // Modular Component Imports
 import { DashboardHome } from '@/modules/dashboard/components/DashboardHome';
@@ -60,6 +64,7 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePortal, setActivePortal] = useState<string | null>(null);
+  const [isRequestAccessOpen, setIsRequestAccessOpen] = useState(false);
   const { user, profile, isLoading, login, logout } = useFirebase();
   const location = useLocation();
 
@@ -76,12 +81,26 @@ export default function App() {
     );
   }
 
+  const handleRequestAccess = () => setIsRequestAccessOpen(true);
+
   if (!user) {
-    return <LandingPage onLogin={login} />;
+    return (
+      <>
+        <Routes>
+          <Route path="/" element={<LandingPage onLogin={login} onRequestAccess={handleRequestAccess} />} />
+          <Route path="/features/:slug" element={<FeaturePage onLogin={login} onRequestAccess={handleRequestAccess} />} />
+          <Route path="/marketing/:slug" element={<MarketingPage onLogin={login} onRequestAccess={handleRequestAccess} />} />
+          <Route path="/superadmin" element={<SuperAdminDashboard user={user} />} />
+          <Route path="*" element={<LandingPage onLogin={login} onRequestAccess={handleRequestAccess} />} />
+        </Routes>
+        <RequestAccessForm isOpen={isRequestAccessOpen} onClose={() => setIsRequestAccessOpen(false)} />
+      </>
+    );
   }
 
   return (
     <div className="min-h-screen bg-bg flex font-sans overflow-hidden h-screen text-text-main selection:bg-primary/10 selection:text-primary">
+      <RequestAccessForm isOpen={isRequestAccessOpen} onClose={() => setIsRequestAccessOpen(false)} />
       {/* SaaS Sidebar Architecture */}
       <aside className={cn(
         "bg-white border-r border-border-theme flex flex-col transition-all duration-300 z-50 shrink-0 shadow-sm",
@@ -229,6 +248,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto">
             <Routes>
               <Route path="/" element={<DashboardHome />} />
+              <Route path="/superadmin" element={<SuperAdminDashboard user={user} />} />
               
               {/* Centralized Academics Module */}
               <Route path="/academics/classes" element={<ClassSmartManagement />} />
