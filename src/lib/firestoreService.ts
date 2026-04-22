@@ -59,6 +59,71 @@ export class FirestoreService {
     await deleteDoc(this.getDocRef(collectionName, id));
   }
 
+  async enrollStudent(data: {
+    name: string;
+    email: string;
+    classId: string;
+    guardianName: string;
+    guardianPhone: string;
+  }) {
+    // 1. Create Student User Record
+    const userId = doc(this.getColRef('users')).id;
+    const userPayload = {
+      id: userId,
+      name: data.name,
+      email: data.email,
+      role: 'STUDENT',
+      schoolId: this.schoolId,
+      createdAt: new Date().toISOString()
+    };
+    await setDoc(this.getDocRef('users', userId), userPayload);
+
+    // 2. Resolve Guardian
+    const guardianQuery = query(this.getColRef('guardians'), where('phone', '==', data.guardianPhone));
+    const guardianSnap = await getDocs(guardianQuery);
+    let guardianId;
+
+    if (guardianSnap.empty) {
+      // Create new Guardian Profile (User & Guardian records)
+      const guardianUserId = doc(this.getColRef('users')).id;
+      await setDoc(this.getDocRef('users', guardianUserId), {
+        id: guardianUserId,
+        name: data.guardianName,
+        email: `guardian_${data.guardianPhone}@school.edu`, // Placeholder email
+        role: 'GUARDIAN',
+        schoolId: this.schoolId,
+        createdAt: new Date().toISOString()
+      });
+
+      guardianId = doc(this.getColRef('guardians')).id;
+      await setDoc(this.getDocRef('guardians', guardianId), {
+        id: guardianId,
+        userId: guardianUserId,
+        phone: data.guardianPhone,
+        schoolId: this.schoolId,
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      guardianId = guardianSnap.docs[0].id;
+    }
+
+    // 3. Create Student Document
+    const studentId = doc(this.getColRef('students')).id;
+    const studentPayload = {
+      id: studentId,
+      userId: userId,
+      classId: data.classId,
+      guardianId: guardianId,
+      status: 'Active',
+      avatar: data.name.charAt(0),
+      schoolId: this.schoolId,
+      createdAt: new Date().toISOString()
+    };
+    await setDoc(this.getDocRef('students', studentId), studentPayload);
+
+    return { studentId, userId, guardianId };
+  }
+
   // Specialized multi-child query for Guardians
   async getGuardianSummary(phone: string) {
     // 1. Find the guardian by phone
@@ -77,13 +142,19 @@ export class FirestoreService {
       const studentData = { ...studentDoc.data(), id: studentDoc.id } as any;
       
       // Get related data in parallel for speed
-      const [user, classData, attendance, fees, results] = await Promise.all([
+      const [user, classData, attendance, rawFees, results] = await Promise.all([
         this.getById('users', studentData.userId),
         this.getById('classes', studentData.classId),
         this.queryByField('attendance', 'entityId', studentData.id),
         this.queryByField('fees', 'studentId', studentData.id),
         this.queryByField('examResults', 'studentId', studentData.id),
       ]);
+
+      // Enrich fees with categories for fiscal display
+      const fees = await Promise.all(rawFees.map(async (f: any) => ({
+        ...f,
+        category: await this.getById('feeCategories', f.categoryId)
+      })));
 
       return {
         student: { ...studentData, user, class: classData },
@@ -105,13 +176,18 @@ export class FirestoreService {
     
     const summary = await Promise.all(studentsSnap.docs.map(async (studentDoc) => {
       const studentData = { ...studentDoc.data(), id: studentDoc.id } as any;
-      const [user, classData, attendance, fees, results] = await Promise.all([
+      const [user, classData, attendance, rawFees, results] = await Promise.all([
         this.getById('users', studentData.userId),
         this.getById('classes', studentData.classId),
         this.queryByField('attendance', 'entityId', studentData.id),
         this.queryByField('fees', 'studentId', studentData.id),
         this.queryByField('examResults', 'studentId', studentData.id),
       ]);
+
+      const fees = await Promise.all(rawFees.map(async (f: any) => ({
+        ...f,
+        category: await this.getById('feeCategories', f.categoryId)
+      })));
 
       return {
         student: { ...studentData, user, class: classData },

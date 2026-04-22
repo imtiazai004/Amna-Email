@@ -14,7 +14,7 @@ export const StudentService = {
       class: await service.getById('classes', s.classId) as any
     })));
   }) as any,
-  create: (data: any) => getService().create('students', data) as any,
+  create: (data: any) => getService().enrollStudent(data) as any,
   promote: (id: string, classId: string) => getService().update('students', id, { classId }) as any,
   withdraw: (id: string) => getService().update('students', id, { status: 'Withdrawn' }) as any,
 };

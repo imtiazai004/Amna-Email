@@ -10,7 +10,8 @@ import {
   Clock,
   DollarSign,
   UserPlus,
-  Ban
+  Ban,
+  Zap
 } from 'lucide-react';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useNavigate } from 'react-router-dom';
@@ -25,11 +26,11 @@ export const DashboardHome = () => {
 
   // Auto-seed if the database is empty for the current school
   React.useEffect(() => {
-    if (!isLoading && stats.students === 0 && currentSchoolId === 'default-school' && !isSeeding) {
+    if (!isLoading && stats.students === 0 && currentSchoolId && !isSeeding) {
       const performSeed = async () => {
         setIsSeeding(true);
         try {
-          await seedDatabase('default-school');
+          await seedDatabase(currentSchoolId);
           refetch();
         } catch (err) {
           console.error("Seeding failed:", err);
@@ -40,6 +41,19 @@ export const DashboardHome = () => {
       performSeed();
     }
   }, [isLoading, stats.students, currentSchoolId, isSeeding, refetch]);
+
+  const handleManualSeed = async () => {
+    if (!currentSchoolId || isSeeding) return;
+    setIsSeeding(true);
+    try {
+      await seedDatabase(currentSchoolId);
+      refetch();
+    } catch (err) {
+      console.error("Manual seeding failed:", err);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const cards = [
     { label: 'Total Students', value: stats.students.toString(), icon: GraduationCap, trend: '+12%', color: 'blue' },
@@ -74,6 +88,14 @@ export const DashboardHome = () => {
             <Clock size={16} />
             <span className="text-[10px] font-black uppercase tracking-widest">Master Clock Sync</span>
           </div>
+          <button 
+            onClick={handleManualSeed}
+            disabled={isSeeding}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all disabled:opacity-50"
+          >
+            <Zap size={14} className="fill-indigo-600" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Re-seed Intelligence</span>
+          </button>
           <button className="relative p-2.5 bg-bg border border-border-theme rounded-lg text-text-muted hover:text-primary transition-all">
             <Bell size={20} />
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
