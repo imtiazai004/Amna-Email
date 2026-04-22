@@ -33,9 +33,9 @@ async function testConnection(retries = 5) {
       
       const isOffline = error.message && error.message.includes('the client is offline');
       if (isOffline) {
-        console.error(`[Firestore] Connection attempt ${i + 1} failed: The client is reported as offline. This usually implies a network block or invalid project/database ID.`);
+        console.error(`[Firestore] Connection attempt ${i + 1} failed: The client is reported as offline.`);
       } else {
-        console.warn(`[Firestore] Connection attempt ${i + 1} failed:`, error.message || error);
+        console.warn(`[Firestore] Connection attempt ${i + 1} failed: ${error.message || String(error)}`);
       }
       
       if (i < retries - 1) {

@@ -49,8 +49,8 @@ export const RequestAccessForm = ({ isOpen, onClose }: RequestAccessFormProps) =
         setSuccess(false);
         setFormData({ schoolName: '', adminName: '', email: '', phone: '', message: '' });
       }, 3000);
-    } catch (error) {
-      console.error("Error submitting request:", error);
+    } catch (error: any) {
+      console.error("Error submitting request:", error.message || String(error));
       alert("Failed to submit request. Please try again.");
     } finally {
       setLoading(false);

@@ -100,8 +100,8 @@ export const SuperAdminDashboard = ({ user }: { user: any }) => {
       });
 
       alert(`Institutional Node Activated: ${lead.schoolName}`);
-    } catch (error) {
-      console.error("Failed to approve node:", error);
+    } catch (error: any) {
+      console.error("Failed to approve node:", error.message || String(error));
     }
   };
 

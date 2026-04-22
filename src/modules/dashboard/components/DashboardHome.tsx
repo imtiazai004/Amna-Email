@@ -32,8 +32,8 @@ export const DashboardHome = () => {
         try {
           await seedDatabase(currentSchoolId);
           refetch();
-        } catch (err) {
-          console.error("Seeding failed:", err);
+        } catch (err: any) {
+          console.error("Seeding failed:", err.message || String(err));
         } finally {
           setIsSeeding(false);
         }
@@ -48,8 +48,8 @@ export const DashboardHome = () => {
     try {
       await seedDatabase(currentSchoolId);
       refetch();
-    } catch (err) {
-      console.error("Manual seeding failed:", err);
+    } catch (err: any) {
+      console.error("Manual seeding failed:", err.message || String(err));
     } finally {
       setIsSeeding(false);
     }

@@ -79,8 +79,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               localStorage.setItem('eduFlow_schoolId', schoolId);
             }
           } catch (error: any) {
-            console.error(`[FirebaseContext] Profile sync error (Attempt ${retryCount + 1}):`, error.message);
-            if (retryCount < maxRetries && (error.message?.includes('offline') || error.code === 'unavailable')) {
+            const errorMsg = error.message || String(error);
+            console.error(`[FirebaseContext] Profile sync error (Attempt ${retryCount + 1}):`, errorMsg);
+            if (retryCount < maxRetries && (errorMsg.includes('offline') || error.code === 'unavailable')) {
               retryCount++;
               setTimeout(fetchProfile, 2000 * retryCount);
             } else {
@@ -120,7 +121,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } else if (error.code === 'auth/popup-blocked') {
         alert('Please enable popups for this site to sign in, or open the app in a new tab.');
       } else {
-        console.error('Firebase Authentication Error:', error);
+        console.error('Firebase Authentication Error:', error.message || String(error));
       }
     } finally {
       setIsAuthenticating(false);
