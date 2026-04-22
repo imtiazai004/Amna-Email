@@ -18,7 +18,7 @@ service cloud.firestore {
 
     // --- CONNECTIVITY PROBE ---
     match /_internal_/probe {
-      allow get: if isSignedIn();
+      allow get: if true;
     }
 
     match /leads/{leadId} {
@@ -54,7 +54,6 @@ service cloud.firestore {
     
     function isValidUser(data, schoolId) {
       return data.keys().hasAll(['id', 'name', 'email', 'role', 'schoolId', 'createdAt']) &&
-             data.keys().size() == 6 &&
              data.schoolId == schoolId &&
              data.name is string && data.name.size() <= 200 &&
              data.email is string && data.email.size() <= 200 &&
@@ -69,7 +68,6 @@ service cloud.firestore {
 
     function isValidFee(data, schoolId) {
       return data.keys().hasAll(['id', 'studentId', 'categoryId', 'amount', 'amountPaid', 'dueDate', 'status', 'schoolId', 'createdAt']) &&
-             data.keys().size() == 9 &&
              data.schoolId == schoolId;
     }
 
@@ -77,13 +75,18 @@ service cloud.firestore {
 
     match /schools/{schoolId} {
       allow get: if isSignedIn(); // Allow discovery of school existence
+      allow write: if isSuperAdmin(); // Super Admin can seed and recover schools
+      
+      match /{allSubDocuments=**} {
+        allow read, write: if isSuperAdmin();
+      }
       
       match /users/{userId} {
         allow get: if true; // Demo portal needs student/teacher names for display
-        allow list: if isAdmin(schoolId);
-        allow create: if isSignedIn() && isValidUser(incoming(), schoolId) && (incoming().id == request.auth.uid || isAdmin(schoolId));
-        allow update: if (isAdmin(schoolId) || request.auth.uid == userId) && 
-                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'email']);
+        allow list: if isAdmin(schoolId) || isSuperAdmin();
+        allow create: if isSignedIn() && isValidUser(incoming(), schoolId) && (incoming().id == request.auth.uid || isAdmin(schoolId) || isSuperAdmin());
+        allow update: if (isAdmin(schoolId) || request.auth.uid == userId || isSuperAdmin()) && 
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'email', 'role']);
       }
 
       match /students/{studentId} {

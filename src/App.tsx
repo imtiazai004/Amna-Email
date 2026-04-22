@@ -184,6 +184,21 @@ export default function App() {
              {sidebarOpen && <p className="text-[9px] font-black text-text-muted/40 uppercase tracking-[0.3em] mb-2">Platform Systems</p>}
           </div>
           
+          {user?.email === 'iamna2462@gmail.com' && (
+            <Link 
+              to="/superadmin" 
+              className={cn(
+                "flex items-center gap-3 px-6 py-3 text-[13px] transition-all border-l-[3px]",
+                location.pathname === '/superadmin' 
+                  ? "bg-red-50 text-red-600 border-l-red-600 font-bold" 
+                  : "text-red-500/70 border-l-transparent hover:bg-red-50 hover:text-red-600"
+              )}
+            >
+              <ShieldCheck size={18} />
+              {sidebarOpen && <span className="uppercase tracking-[0.1em]">Strategic Control</span>}
+            </Link>
+          )}
+
           <button className="w-full flex items-center gap-3 px-6 py-3 text-[13px] text-text-muted hover:bg-bg hover:text-text-main border-l-[3px] border-l-transparent transition-all">
             <Settings size={18} />
             {sidebarOpen && <span className="uppercase tracking-[0.1em]">Core Settings</span>}

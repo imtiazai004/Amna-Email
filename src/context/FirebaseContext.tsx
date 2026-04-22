@@ -48,35 +48,54 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // Attempt to find profile in ANY school (multi-tenant lookup)
+        // High-Resilience Profile Strategy
         const schoolId = currentSchoolId || 'default-school';
         const profileRef = doc(db, 'schools', schoolId, 'users', firebaseUser.uid);
-        const profileSnap = await getDoc(profileRef);
+        
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        const fetchProfile = async () => {
+          try {
+            const profileSnap = await getDoc(profileRef);
+            if (profileSnap.exists()) {
+              const profileData = profileSnap.data() as UserProfile;
+              setProfile(profileData);
+              setCurrentSchoolId(profileData.schoolId);
+              localStorage.setItem('eduFlow_schoolId', profileData.schoolId);
+            } else {
+              // New User Flow
+              const newProfile: UserProfile & { createdAt: string } = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'System User',
+                email: firebaseUser.email || '',
+                role: 'ADMIN',
+                schoolId: schoolId,
+                createdAt: new Date().toISOString()
+              };
+              await setDoc(profileRef, newProfile);
+              setProfile(newProfile as UserProfile);
+              setCurrentSchoolId(schoolId);
+              localStorage.setItem('eduFlow_schoolId', schoolId);
+            }
+          } catch (error: any) {
+            console.error(`[FirebaseContext] Profile sync error (Attempt ${retryCount + 1}):`, error.message);
+            if (retryCount < maxRetries && (error.message?.includes('offline') || error.code === 'unavailable')) {
+              retryCount++;
+              setTimeout(fetchProfile, 2000 * retryCount);
+            } else {
+              // Final fallback
+              setIsLoading(false);
+            }
+          }
+        };
 
-        if (profileSnap.exists()) {
-          const profileData = profileSnap.data() as UserProfile;
-          setProfile(profileData);
-          setCurrentSchoolId(profileData.schoolId);
-          localStorage.setItem('eduFlow_schoolId', profileData.schoolId);
-        } else {
-          // New User Flow
-          const newProfile: UserProfile = {
-            id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'System User',
-            email: firebaseUser.email || '',
-            role: 'ADMIN',
-            schoolId: schoolId
-          };
-          await setDoc(profileRef, newProfile);
-          setProfile(newProfile);
-          setCurrentSchoolId(schoolId);
-          localStorage.setItem('eduFlow_schoolId', schoolId);
-        }
+        await fetchProfile();
       } else {
         setProfile(null);
       }
       setIsLoading(false);
-      setIsAuthenticating(false); // Reset authentication state on auth change
+      setIsAuthenticating(false);
     });
 
     return () => unsubscribe();

@@ -91,7 +91,11 @@ export const seedDatabase = async (schoolId: string = 'default-school') => {
   for (const [collectionName, records] of Object.entries(initialData)) {
     records.forEach((record: any) => {
       const docRef = doc(db, 'schools', schoolId, collectionName, record.id);
-      batch.set(docRef, { ...record, schoolId });
+      batch.set(docRef, { 
+        ...record, 
+        schoolId,
+        createdAt: new Date().toISOString()
+      });
     });
   }
 
